@@ -33,6 +33,7 @@
       box-shadow: 0 10px 24px rgba(0,0,0,0.25);
       background: rgba(255,255,255,0.08);
       color: #fff;
+      cursor: pointer;
     }
     .btn-primary{ background: linear-gradient(90deg,#0052cc,#2a7bff); }
     .btn-accent{ background: linear-gradient(90deg,#00bfa5,#16e0c3); }
@@ -49,7 +50,9 @@
 
 <div class="row">
   <button class="btn btn-primary" id="locateBtn">تحديد موقعي الآن</button>
-  <a class="btn btn-accent" id="orderBtn" href="#" target="_blank" rel="noopener">اطلب خدمة مع موقعي</a>
+  <a class="btn btn-accent" id="orderBtn" href="#" target="_blank" rel="noopener">
+    اطلب خدمة مع موقعي
+  </a>
 </div>
 
 <div id="map"></div>
@@ -59,33 +62,35 @@
   let map, marker, lastLat = null, lastLng = null;
 
   function initMap() {
-    const start = { lat: 25.2048, lng: 55.2708 }; // Dubai default
+    const start = { lat: 25.2048, lng: 55.2708 }; // دبي
     map = new google.maps.Map(document.getElementById("map"), {
       center: start,
-      zoom: 12,
-      disableDefaultUI: false,
+      zoom: 12
     });
 
     marker = new google.maps.Marker({
       position: start,
-      map,
-      title: "Your location",
+      map
     });
   }
 
   function setOrderLink(lat, lng) {
     const mapsLink = encodeURIComponent(`https://maps.google.com/?q=${lat},${lng}`);
-    const text = encodeURIComponent(`Hello HourX, I want to order a service.\nMy location: ${mapsLink}`);
+    const text = encodeURIComponent(
+      `مرحبا HourX، أريد طلب خدمة.\nموقعي: ${mapsLink}`
+    );
     const wa = `https://wa.me/971567444541?text=${text}`;
     document.getElementById("orderBtn").href = wa;
   }
 
   document.getElementById("locateBtn").addEventListener("click", () => {
     const status = document.getElementById("status");
+
     if (!navigator.geolocation) {
       status.textContent = "المتصفح لا يدعم تحديد الموقع.";
       return;
     }
+
     status.textContent = "جارٍ تحديد موقعك…";
 
     navigator.geolocation.getCurrentPosition(
@@ -98,18 +103,21 @@
         map.setZoom(16);
         marker.setPosition(p);
 
-        status.textContent = `تم تحديد موقعك: ${lastLat.toFixed(5)}, ${lastLng.toFixed(5)}`;
+        status.textContent = "تم تحديد موقعك بنجاح";
         setOrderLink(lastLat, lastLng);
       },
       () => {
-        status.textContent = "لم يتم السماح بالموقع أو حدث خطأ. فعّل Location وجرّب.";
+        status.textContent = "فشل تحديد الموقع. فعّل GPS وجرّب مرة أخرى.";
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   });
 </script>
+
+<!-- Google Maps API -->
 <script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=API_KEY_HERE&callback=initMap">
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGuVSG-c2muY4NIhEuMkdkbpJLpRZGRqU&callback=initMap">
 </script>
+
 </body>
 </html>
