@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>HourX – الخريطة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    #map {
+      width: min(980px, 92vw);
+      height: 60vh;
+      margin: 0 auto 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      overflow: hidden;
+      background: rgba(255,255,255,0.06);
+    }
+    .row {
+      width: min(980px, 92vw);
+      margin: 0 auto 18px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      display:inline-block;
+      padding: 14px 18px;
+      border-radius: 12px;
+      text-decoration:none;
+      font-weight: 800;
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .btn-primary{ background: linear-gradient(90deg,#0052cc,#2a7bff); }
+    .btn-accent{ background: linear-gradient(90deg,#00bfa5,#16e0c3); }
+    .hint{ width:min(980px,92vw); margin:0 auto; color: rgba(234,242,247,0.75); text-align:center; }
+  </style>
+</head>
+<body>
+
+<header class="hero" style="min-height: 35vh;">
+  <h1>الخريطة</h1>
+  <p>حدد موقعك بدقة، ثم اطلب الخدمة. سيتم إرسال موقعك تلقائيًا عبر WhatsApp.</p>
+  <p class="note"><a href="index.html">العودة للرئيسية</a></p>
+</header>
+
+<div class="row">
+  <button class="btn btn-primary" id="locateBtn">تحديد موقعي الآن</button>
+  <a class="btn btn-accent" id="orderBtn" href="#" target="_blank" rel="noopener">اطلب خدمة مع موقعي</a>
+</div>
+
+<div id="map"></div>
+<p class="hint" id="status">اضغط “تحديد موقعي الآن”.</p>
+
+<script>
+  let map, marker, lastLat = null, lastLng = null;
+
+  function initMap() {
+    const start = { lat: 25.2048, lng: 55.2708 }; // Dubai default
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: start,
+      zoom: 12,
+      disableDefaultUI: false,
+    });
+
+    marker = new google.maps.Marker({
+      position: start,
+      map,
+      title: "Your location",
+    });
+  }
+
+  function setOrderLink(lat, lng) {
+    const mapsLink = encodeURIComponent(`https://maps.google.com/?q=${lat},${lng}`);
+    const text = encodeURIComponent(`Hello HourX, I want to order a service.\nMy location: ${mapsLink}`);
+    const wa = `https://wa.me/971567444541?text=${text}`;
+    document.getElementById("orderBtn").href = wa;
+  }
+
+  document.getElementById("locateBtn").addEventListener("click", () => {
+    const status = document.getElementById("status");
+    if (!navigator.geolocation) {
+      status.textContent = "المتصفح لا يدعم تحديد الموقع.";
+      return;
+    }
+    status.textContent = "جارٍ تحديد موقعك…";
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        lastLat = pos.coords.latitude;
+        lastLng = pos.coords.longitude;
+
+        const p = { lat: lastLat, lng: lastLng };
+        map.setCenter(p);
+        map.setZoom(16);
+        marker.setPosition(p);
+
+        status.textContent = `تم تحديد موقعك: ${lastLat.toFixed(5)}, ${lastLng.toFixed(5)}`;
+        setOrderLink(lastLat, lastLng);
+      },
+      () => {
+        status.textContent = "لم يتم السماح بالموقع أو حدث خطأ. فعّل Location وجرّب.";
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+</script>
+
+<!-- ضع مفتاح Google Maps هنا -->
+<script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=PUT_YOUR_GOOGLE_MAPS_API_KEY&callback=initMap">
+</script>
+
+</body>
+</html>
